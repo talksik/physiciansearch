@@ -5,6 +5,9 @@ import enter from './images/enter.png';
 import './App.css';
 
 import {Map, InfoWindow, Marker, GoogleApiWrapper} from 'google-maps-react';
+import axios from 'axios';
+import Geocode from "react-geocode";
+Geocode.setApiKey("AIzaSyBLYp4CH1DV_xZHvxtQ5GjaQU4A6gaUzSE");
 
 
 const initialState = {
@@ -28,10 +31,32 @@ class App extends Component {
 
   // Look for person's lat and lng in imported dataset
   search = (e) => {
-    var newLoc = this.state;
-    newLoc['lat'] = 0;
-    newLoc['lng'] = 0;
-    this.setState(newLoc);
+    // get request to backend REST API
+    axios.get(`http://localhost:3000/physicianloc`, {
+        params: {
+          name: this.state.name
+        }
+      })
+      .then(res => {
+        // received data
+        const physician = res.data;
+        console.log(physician);
+        const address = physician.address + ', ' + physician.city + ' ' + physician.state + ' ' + physician.zip_code.toString();
+        // convert address to lat and lng for our frontend map API
+        Geocode.fromAddress(address).then(
+          response => {
+            const { lat, lng } = response.results[0].geometry.location;
+            console.log(lat, lng);
+            this.setState({
+              lat: lat,
+              lng: lng
+            });
+          },
+          error => {
+            console.error(error);
+          }
+        );
+      });
   }
 
   render() {
