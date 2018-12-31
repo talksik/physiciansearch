@@ -32,7 +32,7 @@ class App extends Component {
   // Look for person's lat and lng in imported dataset
   search = (e) => {
     // get request to backend REST API
-    axios.get(`http://localhost:3000/physicianloc`, {
+    axios.get(`https://physiciansearch.herokuapp.com/physicianloc`, {
         params: {
           name: this.state.name
         }
