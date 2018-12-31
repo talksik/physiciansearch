@@ -9,11 +9,12 @@ import axios from 'axios';
 import Geocode from "react-geocode";
 Geocode.setApiKey("AIzaSyBLYp4CH1DV_xZHvxtQ5GjaQU4A6gaUzSE");
 
-
+// centering in the US
 const initialState = {
     name: '',
     lat: 39.8283,
-    lng: -98.57
+    lng: -98.57,
+    error: false
 }
 
 class App extends Component {
@@ -22,6 +23,7 @@ class App extends Component {
     this.state = initialState;
   }
 
+  // Sets the state as user is typing in the name of the physician
   updateName = (e) => {
     var newState = this.state;
     newState['name'] = e.target.value;
@@ -29,7 +31,9 @@ class App extends Component {
     this.setState(newState);
   }
 
-  // Look for person's lat and lng in imported dataset
+  // Connection to the separated backend server => DB
+  // endpoint: https://physiciansearch.herokuapp.com/
+  // local: http://localhost:3000
   search = (e) => {
     // get request to backend REST API
     axios.get(`https://physiciansearch.herokuapp.com/physicianloc`, {
@@ -42,20 +46,29 @@ class App extends Component {
         const physician = res.data;
         console.log(physician);
         const address = physician.address + ', ' + physician.city + ' ' + physician.state + ' ' + physician.zip_code.toString();
-        // convert address to lat and lng for our frontend map API
+
+        // Convert address to lat and lng for our frontend map API
+        // Uses Google's API Geocode to convert
         Geocode.fromAddress(address).then(
           response => {
             const { lat, lng } = response.results[0].geometry.location;
             console.log(lat, lng);
             this.setState({
               lat: lat,
-              lng: lng
+              lng: lng,
+              error: false
             });
           },
           error => {
             console.error(error);
           }
         );
+      }, err => {
+        console.log('Could not find physician');
+        // make the error box appear
+        this.setState({
+          error: true
+        });
       });
   }
 
@@ -71,7 +84,9 @@ class App extends Component {
             onChange={this.updateName}
           />
 
-          {name.length === 0 ? null :
+          {name.length === 0 ?
+            null
+            :
             <img src={enter} className="enterIcon" onClick={this.search} />
           }
         </div>
@@ -102,26 +117,17 @@ class App extends Component {
           }
           </Map>
         </div>
+
+        {this.state.error ?
+          <div className="error">Could not find physician!</div>
+          :
+          null
+        }
       </div>
     );
   }
 }
 
-// <header className="App-header">
-//   <img src={logo} className="App-logo" alt="logo" />
-//   <p>
-//     Edit <code>src/App.js</code> and save to reload.
-//   </p>
-//   <a
-//     className="App-link"
-//     href="https://reactjs.org"
-//     target="_blank"
-//     rel="noopener noreferrer"
-//   >
-//     Learn React
-//   </a>
-// </header>
-
 export default GoogleApiWrapper({
   apiKey: ('AIzaSyBLYp4CH1DV_xZHvxtQ5GjaQU4A6gaUzSE')
-})(App)
+})(App);

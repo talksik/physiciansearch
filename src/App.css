@@ -83,3 +83,18 @@
   display: flex;
   flex: 4;
 }
+
+.error {
+  padding: 10px;
+  margin: 0;
+    position: absolute;
+    bottom: 5%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+  background: black;
+  color: red;
+  border-radius: 20px;
+  height: 20px;
+  width: 400px;
+}
